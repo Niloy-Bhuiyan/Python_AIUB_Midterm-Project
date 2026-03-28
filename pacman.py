@@ -6,6 +6,24 @@ import math
 
 pygame.init()
 
+
+# Load sounds
+pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=512)
+# Load sound effects with error checking
+# Load sounds safely
+try:
+    eat_ghost_sound = pygame.mixer.Sound("sounds/eat_ghost.wav")
+    start_music = pygame.mixer.Sound("sounds/start_music.wav")
+    death_sound = pygame.mixer.Sound("sounds/death.wav")
+except FileNotFoundError as e:
+    print("Sound file missing:", e)
+except Exception as e:
+    print("Error loading sounds:", e)
+    # Provide default empty sound if needed
+    eat_ghost_sound = pygame.mixer.Sound(None)
+    start_music = pygame.mixer.Sound(None)
+    death_sound = pygame.mixer.Sound(None)   
+high_score = 0
 info = pygame.display.Info()
 REAL_WIDTH = info.current_w
 REAL_HEIGHT = info.current_h
@@ -678,6 +696,8 @@ def draw_misc():
     
     score_text = font.render(f'Score: {score}', True, 'white')
     screen.blit(score_text, (10, 920))
+    high_text = font.render(f'High Score: {high_score}', True, 'yellow')
+    screen.blit(high_text, (200, 920))
     if powerup:
         pygame.draw.circle(screen, 'blue', (140, 930), 15)
     for i in range(lives):
@@ -933,9 +953,17 @@ while run:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     game_state = "playing"
+                    # RESET GAME
+                    level_timer = 0
+                    level_name = "Easy"
+                    score = 0
+                    lives = 3
+                
+                elif event.key == pygame.K_ESCAPE:
+                    run = False
                 elif event.key == pygame.K_BACKSPACE:
                     username = username[:-1]
-                else:
+                elif event.unicode.isprintable():
                     username += event.unicode
 
         continue
@@ -1034,6 +1062,10 @@ while run:
             inky_x, inky_y, inky_direction = inky.move_clyde()
         clyde_x, clyde_y, clyde_direction = clyde.move_clyde()
     score, powerup, power_counter, eaten_ghost = check_collisions(score, powerup, power_counter, eaten_ghost)
+
+    if score > high_score:
+        high_score = score
+
     # add to if not powerup to check if eaten ghosts
     if not powerup:
         if (player_circle.colliderect(blinky.rect) and not blinky.dead) or \
@@ -1233,8 +1265,8 @@ while run:
                 direction_command = 3
 
             # ❌ EXIT KEYS
-            elif event.key == pygame.K_ESCAPE or event.key == pygame.K_x:
-                run = False
+            elif event.key == pygame.K_ESCAPE:
+                game_state = "menu"
 
             # ⏸️ PAUSE
             elif event.key == pygame.K_SPACE:
@@ -1283,6 +1315,8 @@ while run:
                 level = copy.deepcopy(boards)
                 game_over = False
                 game_won = False
+                level_timer = 0
+                level_name = "Easy"
 
         # ✅ KEY RELEASE
         if event.type == pygame.KEYUP:
