@@ -11,10 +11,11 @@ pygame.init()
 pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=512)
 # Load sound effects with error checking
 # Load sounds safely
+pygame.mixer.music.load("sounds/start_music.wav")
 try:
     eat_ghost_sound = pygame.mixer.Sound("sounds/eat_ghost.wav")
-    start_music = pygame.mixer.Sound("sounds/start_music.wav")
     death_sound = pygame.mixer.Sound("sounds/death.wav")
+    winning_sound = pygame.mixer.Sound("sounds/winning.mp3")
 except FileNotFoundError as e:
     print("Sound file missing:", e)
 except Exception as e:
@@ -22,7 +23,9 @@ except Exception as e:
     # Provide default empty sound if needed
     eat_ghost_sound = pygame.mixer.Sound(None)
     start_music = pygame.mixer.Sound(None)
-    death_sound = pygame.mixer.Sound(None)   
+    death_sound = pygame.mixer.Sound(None)  
+    winning_sound = pygame.mixer.Sound(None)  
+
 
 
 sound_flags = {
@@ -709,26 +712,31 @@ def draw_misc():
         pygame.draw.circle(screen, 'blue', (140, 930), 15)
     for i in range(lives):
         screen.blit(pygame.transform.scale(player_images[0], (30, 30)), (650 + i * 40, 915))
+    # 🔴 GAME OVER
     if game_over:
         pygame.draw.rect(screen, 'white', [50, 200, 800, 300], 0, 10)
         pygame.draw.rect(screen, 'dark gray', [70, 220, 760, 260], 0, 10)
-        gameover_text = font.render('Game over! Press r to restart!', True, 'red')
-        screen.blit(gameover_text, (100, 300))
+
+        gameover_text = font.render('Game Over! Press R to Restart', True, 'red')
+        screen.blit(gameover_text, (120, 300))
 
         if not sound_flags["game_over_played"]:
-            pygame.mixer.music.stop()   # only stop music, not all sounds
-            death_sound.play()  # play death sound
+            pygame.mixer.music.stop()   # ✅ stop background music only
+            death_sound.play()          # ✅ play death sound
             sound_flags["game_over_played"] = True
 
+
+    # 🟢 GAME WON
     if game_won:
         pygame.draw.rect(screen, 'white', [50, 200, 800, 300], 0, 10)
         pygame.draw.rect(screen, 'dark gray', [70, 220, 760, 260], 0, 10)
-        gameover_text = font.render('Victory! Space bar to restart!', True, 'green')
-        screen.blit(gameover_text, (100, 300))
 
-        # Optional: no sound, or reuse eat_ghost_sound once
+        win_text = font.render('YOU WIN! Press R to Restart', True, 'green')
+        screen.blit(win_text, (120, 300))
+
         if not sound_flags["victory_played"]:
-            eat_ghost_sound.play()
+            pygame.mixer.music.stop()   # ✅ stop background music
+            winning_sound.play()        # ✅ play YOUR winning sound
             sound_flags["victory_played"] = True
     if paused:
         pause_text = font.render('PAUSED', True, 'yellow')
@@ -942,16 +950,40 @@ def get_targets(blink_x, blink_y, ink_x, ink_y, pink_x, pink_y, clyd_x, clyd_y):
     return [blink_target, ink_target, pink_target, clyd_target]
 
 def draw_menu():
-    display.fill("black")
+    display.fill((10, 10, 30))  # dark background
 
-    title = font.render("PACMAN GAME", True, "yellow")
-    display.blit(title, (REAL_WIDTH // 2 - 100, 200))
+    # Title
+    title_font = pygame.font.Font('freesansbold.ttf', 60)
+    title = title_font.render("PAC-MAN", True, (255, 255, 0))
+    display.blit(title, (REAL_WIDTH // 2 - title.get_width() // 2, 120))
 
-    name_text = font.render(f"Username: {username}", True, "white")
-    display.blit(name_text, (REAL_WIDTH // 2 - 150, 300))
+    # Box (UI panel)
+    pygame.draw.rect(display, (30, 30, 60),
+                     (REAL_WIDTH // 2 - 250, 250, 500, 280),
+                     border_radius=15)
 
-    start_text = font.render("Press ENTER to Start", True, "green")
-    display.blit(start_text, (REAL_WIDTH // 2 - 180, 400))
+    # Username label
+    label = font.render("Username:", True, "white")
+    display.blit(label, (REAL_WIDTH // 2 - 200, 300))
+
+    # Input box
+    input_rect = pygame.Rect(REAL_WIDTH // 2 - 50, 295, 200, 40)
+    pygame.draw.rect(display, "white", input_rect, 2)
+
+    name_surface = font.render(username, True, "yellow")
+    display.blit(name_surface, (input_rect.x + 10, input_rect.y + 8))
+
+    # High score
+    high_text = font.render(f"High Score: {high_score}", True, "green")
+    display.blit(high_text, (REAL_WIDTH // 2 - high_text.get_width() // 2, 360))
+
+    # Start text
+    start_text = font.render("Press ENTER to Start", True, "white")
+    display.blit(start_text, (REAL_WIDTH // 2 - start_text.get_width() // 2, 430))
+
+    # Exit text
+    exit_text = font.render("Press ESC to Quit", True, "red")
+    display.blit(exit_text, (REAL_WIDTH // 2 - exit_text.get_width() // 2, 480))
 
 
 level_name = "Easy"
@@ -962,8 +994,8 @@ run = True
 
 while run:
     if game_state == "menu" and not sound_flags["start_played"]:
-        pygame.mixer.stop()
-        start_music.play(-1)
+        pygame.mixer.music.load("sounds/start_music.wav")
+        pygame.mixer.music.play(-1)
         sound_flags["start_played"] = True
     if game_state == "menu":
         draw_menu()
@@ -976,7 +1008,7 @@ while run:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     game_state = "playing"
-                    pygame.mixer.stop()   # ✅ STOP menu music
+                    pygame.mixer.music.stop()   # ✅ STOP menu music
                     # RESET GAME
                     level_timer = 0
                     level_name = "Easy"
@@ -984,8 +1016,7 @@ while run:
                     lives = 3
                 
                 elif event.key == pygame.K_ESCAPE:
-                    game_state = "menu"
-                    sound_flags["start_played"] = False
+                    run = False
                 elif event.key == pygame.K_BACKSPACE:
                     username = username[:-1]
                 elif event.unicode.isprintable():
@@ -1057,7 +1088,7 @@ while run:
         if 1 in level[i] or 2 in level[i]:
             game_won = False
 
-    player_circle = pygame.draw.circle(screen, 'black', (center_x, center_y), 20, 2)
+    player_circle = pygame.Rect(center_x - 20, center_y - 20, 40, 40)
     draw_player()
     blinky = Ghost(blinky_x, blinky_y, targets[0], ghost_speeds[0], blinky_img, blinky_direction, blinky_dead,
                    blinky_box, 0)
@@ -1093,12 +1124,14 @@ while run:
 
     # add to if not powerup to check if eaten ghosts
     if not powerup:
-        if (player_circle.colliderect(blinky.rect) and not blinky.dead) or \
-                (player_circle.colliderect(inky.rect) and not inky.dead) or \
-                (player_circle.colliderect(pinky.rect) and not pinky.dead) or \
-                (player_circle.colliderect(clyde.rect) and not clyde.dead):
+        if (player_circle.colliderect(blinky.rect) and not blinky_dead) or \
+                (player_circle.colliderect(inky.rect) and not inky_dead) or \
+                (player_circle.colliderect(pinky.rect) and not pinky_dead) or \
+                (player_circle.colliderect(clyde.rect) and not clyde_dead):
+            lives -= 1
             if lives > 0:
-                lives -= 1
+                
+                death_sound.play()
                 startup_counter = 0
                 powerup = False
                 power_counter = 0
@@ -1128,10 +1161,12 @@ while run:
                 moving = False
                 startup_counter = 0
     if powerup and player_circle.colliderect(blinky.rect) and eaten_ghost[0] and not blinky.dead:
+        lives -= 1
         if lives > 0:
             powerup = False
             power_counter = 0
-            lives -= 1
+            
+            death_sound.play()
             startup_counter = 0
             player_x = 450
             player_y = 663
@@ -1159,10 +1194,12 @@ while run:
             moving = False
             startup_counter = 0
     if powerup and player_circle.colliderect(inky.rect) and eaten_ghost[1] and not inky.dead:
+        lives -= 1
         if lives > 0:
             powerup = False
             power_counter = 0
-            lives -= 1
+        
+            death_sound.play()
             startup_counter = 0
             player_x = 450
             player_y = 663
@@ -1190,10 +1227,12 @@ while run:
             moving = False
             startup_counter = 0
     if powerup and player_circle.colliderect(pinky.rect) and eaten_ghost[2] and not pinky.dead:
+        lives -= 1
         if lives > 0:
             powerup = False
             power_counter = 0
-            lives -= 1
+            
+            death_sound.play()
             startup_counter = 0
             player_x = 450
             player_y = 663
@@ -1221,10 +1260,12 @@ while run:
             moving = False
             startup_counter = 0
     if powerup and player_circle.colliderect(clyde.rect) and eaten_ghost[3] and not clyde.dead:
+        lives -= 1
         if lives > 0:
             powerup = False
             power_counter = 0
-            lives -= 1
+            
+            death_sound.play()
             startup_counter = 0
             player_x = 450
             player_y = 663
@@ -1291,8 +1332,11 @@ while run:
 
             # ❌ EXIT KEYS
             elif event.key == pygame.K_ESCAPE:
-                game_state = "menu"
-                sound_flags["start_played"] = False
+                if game_state == "playing":
+                    game_state = "menu"
+                    sound_flags["start_played"] = False
+                elif game_state == "menu":
+                    run = False   # EXIT GAME
 
             # ⏸️ PAUSE
             elif event.key == pygame.K_SPACE:
@@ -1304,6 +1348,8 @@ while run:
 
             # 🔁 RESET GAME (only when over)
             elif event.key == pygame.K_r and (game_over or game_won):
+                sound_flags["game_over_played"] = False
+                sound_flags["victory_played"] = False
                 powerup = False
                 power_counter = 0
                 lives = 3
