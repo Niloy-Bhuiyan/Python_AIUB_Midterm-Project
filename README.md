@@ -31,7 +31,14 @@ This version includes **high score persistence using a JSON file**, so the playe
 
 ## 📸 Preview
 
-*(Add a screenshot or GIF of your game here for a better GitHub presence)*
+![Start Screen](images/image.png)  
+*Start screen of the game*
+
+![Gameplay](images/gameinterface.png)  
+*Pac-Man eating dots and avoiding ghosts*
+
+![Game Over](images/gameui2.png)  
+*Ghosts Dies When Eaten Bigger Dots*
 
 ---
 
