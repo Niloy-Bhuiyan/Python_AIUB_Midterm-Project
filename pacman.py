@@ -675,6 +675,7 @@ class Ghost:
 
 
 def draw_misc():
+    
     score_text = font.render(f'Score: {score}', True, 'white')
     screen.blit(score_text, (10, 920))
     if powerup:
@@ -694,6 +695,10 @@ def draw_misc():
     if paused:
         pause_text = font.render('PAUSED', True, 'yellow')
         screen.blit(pause_text, (400, 450))
+    level_text = font.render(f'Level: {level_name}', True, 'white')
+    screen.blit(level_text, (350, 900))
+
+
 
 
 def check_collisions(scor, power, power_count, eaten_ghosts):
@@ -898,18 +903,46 @@ def get_targets(blink_x, blink_y, ink_x, ink_y, pink_x, pink_y, clyd_x, clyd_y):
     return [blink_target, ink_target, pink_target, clyd_target]
 
 def draw_menu():
-    screen.fill("black")
+    display.fill("black")
 
     title = font.render("PACMAN GAME", True, "yellow")
-    screen.blit(title, (350, 200))
+    display.blit(title, (REAL_WIDTH // 2 - 100, 200))
 
     name_text = font.render(f"Username: {username}", True, "white")
-    screen.blit(name_text, (300, 300))
+    display.blit(name_text, (REAL_WIDTH // 2 - 150, 300))
 
-    start_text = font.render("Click ENTER to Start", True, "green")
-    screen.blit(start_text, (300, 400))
+    start_text = font.render("Press ENTER to Start", True, "green")
+    display.blit(start_text, (REAL_WIDTH // 2 - 180, 400))
+
+
+level_name = "Easy"
+level_timer = 0
+
+
 run = True
+
 while run:
+    if game_state == "menu":
+        draw_menu()
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    game_state = "playing"
+                elif event.key == pygame.K_BACKSPACE:
+                    username = username[:-1]
+                else:
+                    username += event.unicode
+
+        continue
+
+
+
+
     timer.tick(fps)
     if counter < 19:
         counter += 1
@@ -929,6 +962,17 @@ while run:
         startup_counter += 1
     else:
         moving = True
+
+
+    level_timer += 1
+
+    # 60 FPS → 20 sec = 1200 frames
+    if level_timer < 1200:
+        level_name = "Easy"
+    elif level_timer < 2400:
+        level_name = "Medium"
+    else:
+        level_name = "Hard"
 
     screen.fill('black')
     draw_board()
