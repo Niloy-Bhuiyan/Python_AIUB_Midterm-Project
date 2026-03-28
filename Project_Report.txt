@@ -1,0 +1,56 @@
+Python Mid Term Project Report
+Project Title: Pac-Man Game using Pygame
+Student Name: Nurul Azam Bhuiyan
+Student ID: 23-50020-1
+University: AIUB (American International University-Bangladesh)
+1. Project Objective
+The objective of this project is to develop a Pac-Man-style arcade game using Python and Pygame, demonstrating core programming concepts, Object-Oriented Programming (OOP), file handling, and use of external libraries.
+2. Technologies Used
+• Python 3
+• Pygame Library
+• JSON for data storage
+• 
+3. Setup & Installation
+1. Clone the repository
+git clone https://github.com/Niloy-Bhuiyan/Python_AIUB_Midterm-Project.git
+
+2. Navigate to project folder
+cd Python_AIUB_Midterm-Project
+
+3. Install dependencies (make sure Python 3 and pip are installed)
+pip install pygame
+
+4. Run the game
+python pacman.py
+
+4. Features
+• Player-controlled movement
+• Multiple ghosts
+• Power-up mode
+• Lives system
+• Score tracking
+• Sound effects and music
+5. Object-Oriented Design
+•	No OOP was used till now
+6. Data Persistence
+High scores are stored in JSON format and loaded on game start, ensuring persistence across sessions.
+7. Core Functionalities
+1.	Player-controlled movement of Pac-Man
+2.	Multiple ghosts with independent movement
+3.	Collision detection with walls and ghosts
+4.	Power-up mode (Pac-Man can eat ghosts)
+5.	Score tracking during gameplay
+6.	High score is saved and loaded using JSON, so the highest score persists across game restarts
+8. Validation
+Handles invalid inputs and prevents crashes through proper checks and error handling.
+9. Known Issues
+• Minor variation in ghost movement
+• Collision detection edge cases
+• Limited responsiveness
+10. Future Improvements
+• Add levels
+• Improve AI
+• Add menu system
+• Improve UI responsiveness
+11. Conclusion
+This project demonstrates a complete implementation of a game using Python and Pygame, fulfilling all academic requirements.
