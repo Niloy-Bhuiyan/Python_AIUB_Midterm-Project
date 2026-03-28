@@ -3,6 +3,7 @@ import copy
 from board import boards
 import pygame
 import math
+import json
 
 pygame.init()
 
@@ -26,7 +27,19 @@ except Exception as e:
     death_sound = pygame.mixer.Sound(None)  
     winning_sound = pygame.mixer.Sound(None)  
 
+def load_high_score():
+    try:
+        with open("highscore.json", "r") as file:
+            data = json.load(file)
+            return data.get("high_score", 0)
+    except:
+        return 0
 
+
+def save_high_score(score):
+    data = {"high_score": score}
+    with open("highscore.json", "w") as file:
+        json.dump(data, file)
 
 sound_flags = {
     "start_played": False,
@@ -89,6 +102,7 @@ paused = False
 normal_speed = player_speed
 fast_speed = player_speed * 2
 score = 0
+high_score = load_high_score()
 powerup = False
 power_counter = 0
 eaten_ghost = [False, False, False, False]
@@ -1121,6 +1135,7 @@ while run:
 
     if score > high_score:
         high_score = score
+        save_high_score(high_score)
 
     # add to if not powerup to check if eaten ghosts
     if not powerup:
