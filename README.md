@@ -1,6 +1,11 @@
+
+---
+
 # 🟡 Pac-Man Game (Python - AIUB Midterm Project)
 
 A classic **Pac-Man-style arcade game** built using **Python and Pygame**, developed as part of an academic midterm project at AIUB.
+
+This version includes **high score persistence using a JSON file**, so the player’s high score is saved even after closing the game.
 
 ---
 
@@ -11,7 +16,7 @@ A classic **Pac-Man-style arcade game** built using **Python and Pygame**, devel
 * 🔵 Power-up mode to eat ghosts
 * ❤️ Lives system with game over handling
 * 🎵 Sound effects and background music
-* 🧠 Score and high score tracking
+* 🧠 Score and high score tracking (**saved in JSON**)
 * 🎨 Simple and clean game graphics
 
 ---
@@ -20,6 +25,7 @@ A classic **Pac-Man-style arcade game** built using **Python and Pygame**, devel
 
 * **Python 3**
 * **Pygame Library**
+* **JSON** (for high score persistence)
 
 ---
 
@@ -36,8 +42,6 @@ Follow these steps to run the project on your local machine.
 ---
 
 ### 🔹 1. Clone the Repository
-
-Open your terminal or command prompt and run:
 
 ```bash
 git clone https://github.com/Niloy-Bhuiyan/Python_AIUB_Midterm-Project.git
@@ -63,21 +67,19 @@ Activate it:
 
 * **Windows:**
 
-  ```bash
-  venv\Scripts\activate
-  ```
+```bash
+venv\Scripts\activate
+```
 
 * **Mac/Linux:**
 
-  ```bash
-  source venv/bin/activate
-  ```
+```bash
+source venv/bin/activate
+```
 
 ---
 
 ### 🔹 4. Install Dependencies
-
-Make sure you have **Pygame** installed:
 
 ```bash
 pip install pygame
@@ -108,7 +110,8 @@ python pacman.py
 * Eat all the dots to increase your score
 * Avoid ghosts unless you have a power-up
 * Use power pellets to turn ghosts blue and eat them
-* Survive as long as possible!
+* Survive as long as possible
+* Beat and **save the high score**
 
 ---
 
@@ -118,8 +121,10 @@ python pacman.py
 Python_AIUB_Midterm-Project/
 │
 ├── pacman.py              # Main game file
+├── board.py               # Maze layout and board logic
 ├── images/                # Game assets (sprites)
 ├── sounds/                # Sound effects and music
+├── highscore.json         # JSON file to save high score
 ├── fonts/                 # Font files (if any)
 └── README.md
 ```
@@ -150,3 +155,4 @@ This project is for educational purposes. Feel free to use and modify it.
 
 Give the repository a ⭐ on GitHub to support the work!
 
+---
