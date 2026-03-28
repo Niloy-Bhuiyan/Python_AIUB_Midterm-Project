@@ -22,6 +22,11 @@ font = pygame.font.Font('freesansbold.ttf', 20)
 level = copy.deepcopy(boards)
 color = 'blue'
 PI = math.pi
+
+game_state = "menu"   # menu, playing
+username = "Player1"
+input_active = False
+
 player_images = []
 for i in range(1, 5):
     player_images.append(pygame.transform.scale(pygame.image.load(f'assets/player_images/{i}.png'), (45, 45)))
@@ -892,7 +897,17 @@ def get_targets(blink_x, blink_y, ink_x, ink_y, pink_x, pink_y, clyd_x, clyd_y):
             clyd_target = return_target
     return [blink_target, ink_target, pink_target, clyd_target]
 
+def draw_menu():
+    screen.fill("black")
 
+    title = font.render("PACMAN GAME", True, "yellow")
+    screen.blit(title, (350, 200))
+
+    name_text = font.render(f"Username: {username}", True, "white")
+    screen.blit(name_text, (300, 300))
+
+    start_text = font.render("Click ENTER to Start", True, "green")
+    screen.blit(start_text, (300, 400))
 run = True
 while run:
     timer.tick(fps)
