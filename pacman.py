@@ -23,6 +23,13 @@ except Exception as e:
     eat_ghost_sound = pygame.mixer.Sound(None)
     start_music = pygame.mixer.Sound(None)
     death_sound = pygame.mixer.Sound(None)   
+
+
+sound_flags = {
+    "start_played": False,
+    "game_over_played": False,
+    "victory_played": False
+}
 high_score = 0
 info = pygame.display.Info()
 REAL_WIDTH = info.current_w
@@ -703,15 +710,26 @@ def draw_misc():
     for i in range(lives):
         screen.blit(pygame.transform.scale(player_images[0], (30, 30)), (650 + i * 40, 915))
     if game_over:
-        pygame.draw.rect(screen, 'white', [50, 200, 800, 300],0, 10)
+        pygame.draw.rect(screen, 'white', [50, 200, 800, 300], 0, 10)
         pygame.draw.rect(screen, 'dark gray', [70, 220, 760, 260], 0, 10)
-        gameover_text = font.render('Game over! Space bar to restart!', True, 'red')
+        gameover_text = font.render('Game over! Press r to restart!', True, 'red')
         screen.blit(gameover_text, (100, 300))
+
+        if not sound_flags["game_over_played"]:
+            pygame.mixer.music.stop()   # only stop music, not all sounds
+            death_sound.play()  # play death sound
+            sound_flags["game_over_played"] = True
+
     if game_won:
-        pygame.draw.rect(screen, 'white', [50, 200, 800, 300],0, 10)
+        pygame.draw.rect(screen, 'white', [50, 200, 800, 300], 0, 10)
         pygame.draw.rect(screen, 'dark gray', [70, 220, 760, 260], 0, 10)
         gameover_text = font.render('Victory! Space bar to restart!', True, 'green')
         screen.blit(gameover_text, (100, 300))
+
+        # Optional: no sound, or reuse eat_ghost_sound once
+        if not sound_flags["victory_played"]:
+            eat_ghost_sound.play()
+            sound_flags["victory_played"] = True
     if paused:
         pause_text = font.render('PAUSED', True, 'yellow')
         screen.blit(pause_text, (400, 450))
@@ -720,22 +738,23 @@ def draw_misc():
 
 
 
-
 def check_collisions(scor, power, power_count, eaten_ghosts):
     num1 = (HEIGHT - 50) // 32
     num2 = WIDTH // 30
     if 0 < player_x < 870:
-        if level[center_y // num1][center_x // num2] == 1:
+        cell = level[center_y // num1][center_x // num2]
+        if cell == 1:  # normal pellet
             level[center_y // num1][center_x // num2] = 0
             scor += 10
-        if level[center_y // num1][center_x // num2] == 2:
+            # no sound for normal pellet
+        elif cell == 2:  # power pellet
             level[center_y // num1][center_x // num2] = 0
             scor += 50
             power = True
             power_count = 0
             eaten_ghosts = [False, False, False, False]
+            eat_ghost_sound.play()  # play power-up sound
     return scor, power, power_count, eaten_ghosts
-
 
 def draw_board():
     num1 = ((HEIGHT - 50) // 32)
@@ -942,6 +961,10 @@ level_timer = 0
 run = True
 
 while run:
+    if game_state == "menu" and not sound_flags["start_played"]:
+        pygame.mixer.stop()
+        start_music.play(-1)
+        sound_flags["start_played"] = True
     if game_state == "menu":
         draw_menu()
         pygame.display.flip()
@@ -953,6 +976,7 @@ while run:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     game_state = "playing"
+                    pygame.mixer.stop()   # ✅ STOP menu music
                     # RESET GAME
                     level_timer = 0
                     level_name = "Easy"
@@ -960,7 +984,8 @@ while run:
                     lives = 3
                 
                 elif event.key == pygame.K_ESCAPE:
-                    run = False
+                    game_state = "menu"
+                    sound_flags["start_played"] = False
                 elif event.key == pygame.K_BACKSPACE:
                     username = username[:-1]
                 elif event.unicode.isprintable():
@@ -1267,6 +1292,7 @@ while run:
             # ❌ EXIT KEYS
             elif event.key == pygame.K_ESCAPE:
                 game_state = "menu"
+                sound_flags["start_played"] = False
 
             # ⏸️ PAUSE
             elif event.key == pygame.K_SPACE:
